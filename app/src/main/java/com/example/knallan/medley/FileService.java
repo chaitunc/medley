@@ -4,6 +4,7 @@ package com.example.knallan.medley;
  * Created by knallan on 12/21/2017.
  */
 
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
@@ -15,16 +16,28 @@ import java.util.Random;
 
 public class FileService {
 
+    private static FileService instance;
 
     private ArrayList<File> files;
 
     public void init() {
         if (files == null) {
-            files = new ArrayList<File>();
+
         }
     }
 
-    public void listf(String directoryName, ArrayList<File> files) {
+    public static FileService getInstance(){
+        if(instance!=null){
+            return instance;
+        }else{
+            instance = new FileService();
+            instance.files = new ArrayList<File>();
+            listf(Environment.getExternalStorageDirectory().getPath() + "/Music", instance.files);
+            return instance;
+        }
+    }
+
+    public static void listf(String directoryName, ArrayList<File> files) {
         File directory = new File(directoryName);
 
         // get all the files from a directory
@@ -59,9 +72,8 @@ public class FileService {
         }
     }
 
-    public File getRandomFile(String folderpath) {
-        init();
-        listf(folderpath, this.files);
+    public File getRandomFile() {
+
         if (this.files != null && this.files.size() > 0) {
             int numOfFIles = this.files.size();
             int randomFileIndex = 0;
@@ -69,7 +81,7 @@ public class FileService {
                 Random random = new Random();
                 randomFileIndex = random.nextInt(numOfFIles - 1);
             }
-            Log.i("FileService", "fodlerpath: " + folderpath);
+
             Log.i("FileService", "Totla number of files:" + numOfFIles);
             Log.i("FileService", "Random FIle:" + this.files.get(randomFileIndex).getName());
             return this.files.get(randomFileIndex);
@@ -77,5 +89,7 @@ public class FileService {
         }
         return null;
     }
+
+
 }
 

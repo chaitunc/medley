@@ -2,53 +2,68 @@ package com.example.knallan.medley;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
-import com.google.android.exoplayer2.RenderersFactory;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.ByteArrayDataSource;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
-import java.io.File;
-
-
-public class MainActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
     public static final String GO_UP_FOLDER = "..go up folder";
 
     private static final int BUFFER_SEGMENT_SIZE = 64 * 1024;
     private static final int BUFFER_SEGMENT_COUNT = 256;
 
     private View mLayout;
-    private ExoPlayer player;
+    private MedleyExoPlayer player;
     boolean medleyplay = false;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, true);
+
+        player = new MedleyExoPlayer();
         boolean isOk = checkPermission();
         if (!isOk) {
             requestStoragePermission();
@@ -83,49 +98,11 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
 
         // Use the current directory as title
 
-        String path = Environment.getExternalStorageDirectory().getPath() + "/Music";
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String path = Environment.getExternalStorageDirectory().getPath() + "/" + pref.getString("folder_location", "Music");
         Log.i("MainActivity", "Base PATH:" + path);
 
-
-        // 1. Create a default TrackSelector
-        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-        TrackSelection.Factory audioTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
-        TrackSelector trackSelector = new DefaultTrackSelector(audioTrackSelectionFactory);
-
-// 2. Create a default LoadControl
-        LoadControl loadControl = new DefaultLoadControl();
-
-// 3. Create the player89
-        RenderersFactory renderersFactory = new DefaultRenderersFactory(this);
-        player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
-
-        FileService fs = new FileService();
-        MedlyService service = new MedlyService(fs);
-
-        service.getFile(path);
-        String url = service.getSoundFilePath();
-
-
-        Uri uri = Uri.fromFile(new File(url));
-
-        byte[] bytes = service.getMedleyBytes(MainActivity.this.getApplicationContext());
-
-
-        final ByteArrayDataSource byteArrayDataSource = new ByteArrayDataSource(bytes);
-        DataSpec dataSpec = new DataSpec(uri);
-        byteArrayDataSource.open(dataSpec);
-
-        ByteArrayDataSource.Factory factory = new DataSource.Factory() {
-            @Override
-            public DataSource createDataSource() {
-                return byteArrayDataSource;
-            }
-        };
-        MediaSource source = new ExtractorMediaSource(uri, factory, new DefaultExtractorsFactory(), null, null);
-        player.prepare(source);
-
-        //exoPlayer.sendMessage(videoRenderer, MediaCodecVideoTrackRenderer.MSG_SET_SURFACE, surfaceView.getHolder().getSurface());
-        player.setPlayWhenReady(true);
+        player.play(this);
 
 
     }
@@ -141,7 +118,7 @@ public class MainActivity extends Activity implements ActivityCompat.OnRequestPe
         super.onResume();
         if (medleyplay) {
             try {
-                medley();
+                //   medley();
             } catch (Exception e) {
                 e.printStackTrace();
             }
