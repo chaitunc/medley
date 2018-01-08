@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "826583411283",
+    "project_id": "medley-bebf4"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:826583411283:android:27d689d63f1b7a06",
+        "android_client_info": {
+          "package_name": "com.example.knallan.medley"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "826583411283-7qavjkh45mablf9giifkqpsm4u28199b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.knallan.medley",
+            "certificate_hash": "07bc54fe77fd44c8977b2457a5a6380e57b23a8f"
+          }
+        },
+        {
+          "client_id": "826583411283-p8i79rj61ifa8hge1mkquea5ltjl7vcu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAJznC8NLNAjRth25852VvLHmgM4b5BSs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

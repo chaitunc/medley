@@ -15,4 +15,11 @@
         android:inputType="textCapWords"
         android:title="Play medley from folder"
          />
+    <android.support.v7.preference.CheckBoxPreference android:key="from_drive"
+        android:defaultValue="NO"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:inputType="textCapWords"
+        android:title="Play medley from Google Drive"/>
+
 </PreferenceScreen>
