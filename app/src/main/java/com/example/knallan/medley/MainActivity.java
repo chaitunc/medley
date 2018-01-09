@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         playFromDriveSwitch = (Switch) findViewById(R.id.switch2);
         final TextView folderpathView =  findViewById(R.id.folderPath);
         final TextView emailIdView =  findViewById(R.id.emailId);
+        SeekBar medleyPlayTime =  findViewById(R.id.seekBar);
+
 
         boolean playFromFolder = settings.getBoolean("playFromFolder",false);
         boolean playFromDrive = settings.getBoolean("playFromDrive",false);
@@ -59,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             String emailId = settings.getString("emailId", TAP_TO_SIGNIN);
             emailIdView.setText(emailId);
             intent.putExtra("Reload",true);
-            //startActivityForResult(intent,1);
+            startActivityForResult(intent,1);
         }
 
         playFromFolderSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -126,6 +129,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         }
 
         player = MedleyExoPlayer.getInstance();
+
+        medleyPlayTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int minValue = 30;
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                player.setMedleyPlayTime((progress+minValue)*1000);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
     }
 

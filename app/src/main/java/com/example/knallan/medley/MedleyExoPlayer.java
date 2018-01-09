@@ -86,6 +86,7 @@ public class MedleyExoPlayer implements Player.EventListener {
 
     public void setMedleyPlayTime(int medleyPlayTime) {
         this.medleyPlayTime = medleyPlayTime;
+        Log.i("player","medleyPlayTime:"+medleyPlayTime);
     }
 
     private int medleyPlayTime;
@@ -161,9 +162,10 @@ public class MedleyExoPlayer implements Player.EventListener {
             final long realDurationMillis = player.getDuration();
             if(player.getDuration()>0) {
                 int inSec = (int) (realDurationMillis / 1000);
-                if(inSec>30) {
+                int medleyTime = getMedleyPlayTime()/1000;
+                if(inSec>medleyTime) {
                     Random random = new Random();
-                    int startSec = random.nextInt(inSec - 30);
+                    int startSec = random.nextInt(inSec - medleyTime);
                     Log.i("player", realDurationMillis + "starting at " + startSec);
                     player.seekTo(startSec * 1000);
                 }
