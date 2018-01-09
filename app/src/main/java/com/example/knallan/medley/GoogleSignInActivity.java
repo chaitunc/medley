@@ -3,14 +3,12 @@ package com.example.knallan.medley;
 import android.Manifest;
 import android.accounts.AccountManager;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -27,18 +25,25 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class GoogleSignInActivity extends Activity
         implements EasyPermissions.PermissionCallbacks {
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private Button mCallApiButton;
-    ProgressDialog mProgress;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
-
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
 
-    private static final String BUTTON_TEXT = "Call Drive API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = {  DriveScopes.DRIVE };
+    private static final String[] SCOPES = {  DriveScopes.DRIVE ,DriveScopes.DRIVE_FILE};
+
+    public void setReloadUserId(boolean reloadUserId) {
+        this.reloadUserId = reloadUserId;
+    }
+
+    public boolean isReloadUserId() {
+        return reloadUserId;
+    }
+
+    private boolean reloadUserId = false;
+
+
 
     /**
      * Create the main activity.
@@ -52,7 +57,8 @@ public class GoogleSignInActivity extends Activity
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
         boolean reload = getIntent().getBooleanExtra("Reload",false);
-        getResultsFromApi(reload);
+        setReloadUserId(reload);
+        getResultsFromApi();
 
 
     }
@@ -66,11 +72,11 @@ public class GoogleSignInActivity extends Activity
      * of the preconditions are not satisfied, the app will prompt the user as
      * appropriate.
      */
-    private void getResultsFromApi(boolean reload) {
+    private void getResultsFromApi() {
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
-            chooseAccount(reload);
+            chooseAccount();
         } else {
             new DriveFilesTask(mCredential,this).execute();
 
@@ -94,15 +100,15 @@ public class GoogleSignInActivity extends Activity
      * is granted.
      */
     @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
-    private void chooseAccount(boolean reload) {
+    private void chooseAccount() {
         if (EasyPermissions.hasPermissions(
                 this, Manifest.permission.GET_ACCOUNTS)) {
             String accountName = getPreferences(Context.MODE_PRIVATE)
                     .getString(PREF_ACCOUNT_NAME, null);
-            if (accountName != null && reload) {
+            if (accountName != null && isReloadUserId()) {
                 mCredential.setSelectedAccountName(accountName);
 
-                getResultsFromApi(reload);
+                getResultsFromApi();
             } else {
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
@@ -136,11 +142,12 @@ public class GoogleSignInActivity extends Activity
         switch(requestCode) {
             case Utils.REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
-                    mOutputText.setText(
-                            "This app requires Google Play Services. Please install " +
-                                    "Google Play Services on your device and relaunch this app.");
+                    String message = "This app requires Google Play Services. Please install " +
+                            "Google Play Services on your device and relaunch this app.";
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                 } else {
-                    getResultsFromApi(false);
+                    setReloadUserId(false);
+                    getResultsFromApi();
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
@@ -155,13 +162,15 @@ public class GoogleSignInActivity extends Activity
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
-                        getResultsFromApi(false);
+                        setReloadUserId(false);
+                        getResultsFromApi();
                     }
                 }
                 break;
             case REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
-                    getResultsFromApi(false);
+                    setReloadUserId(false);
+                    getResultsFromApi();
                 }
                 break;
         }

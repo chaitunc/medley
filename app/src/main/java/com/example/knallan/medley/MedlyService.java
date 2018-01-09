@@ -14,22 +14,13 @@ public class MedlyService {
     SharedPreferences settings;
 
     public String getSoundFilePath() {
-        if (soundFile != null)
-            return soundFile;
-        else {
-            return null;
-        }
+        soundFile = FileService.getInstance(this.settings).getRandomFile();
+        return soundFile;
     }
 
     MedlyService(SharedPreferences settings) {
         this.settings =settings;
     }
 
-    public byte[] getMedleyBytes() throws Exception {
 
-        soundFile = FileService.getInstance(this.settings).getRandomFile();
-
-        return null;
-
-    }
 }

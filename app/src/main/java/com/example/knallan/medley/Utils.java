@@ -12,7 +12,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 public class Utils {
 
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
-
+    static final String PREFS_NAME = "MedleySettings";
     /**
      * Display an error dialog showing that Google Play Services is missing
      * or out of date.

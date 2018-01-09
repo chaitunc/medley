@@ -75,8 +75,7 @@ public class DriveFilesTask extends AsyncTask<Void, Void, List<String>> {
 
         FileList result = mService.files().list()
                 .setQ("mimeType='audio/mp3'")
-                //.setPageSize(10)
-                .setFields("items(downloadUrl,fileSize,originalFilename)")
+                .setFields("items(downloadUrl,originalFilename)")
                 .execute();
         List<File> files = result.getItems();
         if (files != null) {

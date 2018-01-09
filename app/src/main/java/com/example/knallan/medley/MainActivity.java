@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -20,21 +19,20 @@ import android.widget.Toast;
 
 
 public class MainActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
-    private static final String PREFS_NAME = "MedleySettings";
+
     public static final String TAP_TO_SELECT_FOLDER = "TAP to select folder";
     public static final String TAP_TO_SIGNIN = "TAP to signin";
-    Switch playFromFolderSwitch, playFromDriveSwitch;
 
+    Switch playFromFolderSwitch, playFromDriveSwitch;
     private MedleyExoPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.i("MainActivity", "inside oncreate");
 
         // Restore preferences
-        final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        final SharedPreferences settings = getSharedPreferences(Utils.PREFS_NAME, 0);
         final SharedPreferences.Editor editor = settings.edit();
 
         // initiate view's
@@ -61,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             String emailId = settings.getString("emailId", TAP_TO_SIGNIN);
             emailIdView.setText(emailId);
             intent.putExtra("Reload",true);
-            startActivityForResult(intent,1);
+            //startActivityForResult(intent,1);
         }
 
         playFromFolderSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -99,28 +97,24 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             }
         });
 
-        folderpathView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
+
+        folderpathView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 String folderPath = settings.getString("folderPath", TAP_TO_SELECT_FOLDER);
                 if(TAP_TO_SELECT_FOLDER.equalsIgnoreCase(folderPath)){
                     folderPath = Environment.getExternalStorageDirectory().getPath();
                     editor.putString("folderPath",folderPath );
+                    editor.commit();
                     folderpathView.setText(folderPath);
                 }
-                return true;
             }
         });
 
-        emailIdView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
+        emailIdView.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 String emailId = settings.getString("emailId", TAP_TO_SIGNIN);
-              //  if(TAP_TO_SIGNIN.equalsIgnoreCase(emailId)){
-                    intent.putExtra("Reload",false);
-                    startActivityForResult(intent,1);
-               // }
-                return true;
+                intent.putExtra("Reload",false);
+                startActivityForResult(intent,1);
             }
         });
 
@@ -142,20 +136,16 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     private boolean checkPermission() {
-        // BEGIN_INCLUDE(startCamera)
-        // Permission is missing and must be requested.
-        return ActivityCompat.checkSelfPermission(this, Manifest.permission.CAPTURE_AUDIO_OUTPUT)
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
-        // END_INCLUDE(startCamera)
     }
     private void requestStoragePermission() {
 
         // Request the permission. The result will be received in onRequestPermissionResult().
         ActivityCompat.requestPermissions(this,
                 new String[]{
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO,
-                        Manifest.permission.CAPTURE_AUDIO_OUTPUT,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+
                 },
                 0);
 
@@ -172,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
         buttonPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences settings = getSharedPreferences(Utils.PREFS_NAME, 0);
                 boolean playFromFolder = settings.getBoolean("playFromFolder",false);
                 boolean playFromDrive = settings.getBoolean("playFromDrive",false);
 
@@ -212,10 +202,11 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         if (requestCode == 0) {
-            if (grantResults.length == 3 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 addButtonActions();
             } else {
                 Log.i("Main", "Permission denied");
+                showMessage("Permission denied.");
             }
         }
     }
@@ -228,12 +219,12 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
                 String emailId = data.getStringExtra("emailId");
                 TextView emailIdView =  findViewById(R.id.emailId);
                 emailIdView.setText(emailId);
-                final SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                final SharedPreferences settings = getSharedPreferences(Utils.PREFS_NAME, 0);
                 final SharedPreferences.Editor editor = settings.edit();
                 editor.putString("emailId",emailId);
                 editor.commit();
             }
 
         }
-    }//onActivityResult
+    }
 }

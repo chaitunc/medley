@@ -39,11 +39,57 @@ import java.util.Random;
 
 public class MedleyExoPlayer implements Player.EventListener {
 
+    public static final int DEFAULT_MEDLEY_PLAY_TIME_INMS = 30000;
     private ExoPlayer player;
     Context mContext;
     private MedlyService service;
-    CountDownTimer timer;
-    boolean started = false;
+    private CountDownTimer timer;
+    boolean playing = false;
+
+    public CountDownTimer getTimer() {
+         return timer;
+    }
+
+    public CountDownTimer getNewTimer() {
+        if(timer!=null){
+            timer.cancel();
+            timer = null;
+        }
+        timer = new CountDownTimer(getMedleyPlayTime(),10000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                Log.i("counter","remianing time" + millisUntilFinished/1000);
+            }
+
+            @Override
+            public void onFinish() {
+                try {
+                    Log.i("counter","countdownFinished" );
+                    addMediaSource();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        return timer;
+    }
+
+
+
+
+
+    public int getMedleyPlayTime() {
+        int time = medleyPlayTime< DEFAULT_MEDLEY_PLAY_TIME_INMS ? DEFAULT_MEDLEY_PLAY_TIME_INMS :medleyPlayTime;
+        Log.i("player","getMedleyPlayTime:"+time);
+        return time;
+    }
+
+    public void setMedleyPlayTime(int medleyPlayTime) {
+        this.medleyPlayTime = medleyPlayTime;
+    }
+
+    private int medleyPlayTime;
+
 
     private static final MedleyExoPlayer ourInstance = new MedleyExoPlayer();
 
@@ -64,22 +110,7 @@ public class MedleyExoPlayer implements Player.EventListener {
         player.addListener(ourInstance);
         this.mContext = context;
         service = new MedlyService(context.getSharedPreferences("MedleySettings", 0));
-        timer = new CountDownTimer(10000,1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
 
-            }
-
-            @Override
-            public void onFinish() {
-                try {
-                    started = false;
-                    addMediaSource();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
         return player;
 
     }
@@ -91,13 +122,11 @@ public class MedleyExoPlayer implements Player.EventListener {
         MediaSource source = getMediaSource();
         player.prepare(source);
         player.setPlayWhenReady(true);
-        started = false;
 
     }
 
     private MediaSource getMediaSource() throws Exception {
 
-        service.getMedleyBytes();
         String source = service.getSoundFilePath();
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory =
@@ -119,6 +148,7 @@ public class MedleyExoPlayer implements Player.EventListener {
     }
 
     private void addMediaSource() throws Exception {
+        playing = false;
         MediaSource source = getMediaSource();
         player.prepare(source);
     }
@@ -126,27 +156,31 @@ public class MedleyExoPlayer implements Player.EventListener {
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
 
-        if (playbackState == Player.STATE_READY && started == false) {
+        if (playbackState == Player.STATE_READY && playing == false) {
+            Log.i("player","duration:" +player.getDuration());
             final long realDurationMillis = player.getDuration();
-            int inSec = (int)(realDurationMillis/1000);
-            Random random = new Random();
-            int startSec = random.nextInt(inSec - 30);
-            player.seekTo(startSec*1000 );
-            Log.i("player", "state ready");
-            timer.start();
-            started = true;
+            if(player.getDuration()>0) {
+                int inSec = (int) (realDurationMillis / 1000);
+                if(inSec>30) {
+                    Random random = new Random();
+                    int startSec = random.nextInt(inSec - 30);
+                    Log.i("player", realDurationMillis + "starting at " + startSec);
+                    player.seekTo(startSec * 1000);
+                }
+            }
+            playing = true;
+            getNewTimer().start();
         }
-        if( playbackState == Player.STATE_ENDED){
 
-        }
+
+
 
     }
 
     public void stop() {
         if(player!=null){
             player.stop();
-            timer.cancel();
-            started = false;
+            getTimer().cancel();
         }
     }
 
@@ -181,4 +215,7 @@ public class MedleyExoPlayer implements Player.EventListener {
     }
 
 
+    public void release() {
+        player.release();
+    }
 }
