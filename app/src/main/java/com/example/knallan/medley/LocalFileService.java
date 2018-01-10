@@ -43,14 +43,16 @@ public class LocalFileService extends FileService{
                     return true;
                 }
                 if (pathName.isFile()) {
-                    String mimeType = URLConnection.guessContentTypeFromName(pathName.getAbsolutePath());
                     try {
+                        String mimeType = URLConnection.guessContentTypeFromName(pathName.getAbsolutePath());
+
                         if (mimeType!=null && mimeType.startsWith("audio")) {
                             return true;
                         }
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
-                        e.printStackTrace();
+                       // e.printStackTrace();
+                        return false;
                     }
                 }
                 return false;
