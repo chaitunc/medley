@@ -12,18 +12,18 @@ import java.util.Random;
 
 public class DriveFileService extends FileService{
 
-    private List<String> fileInfo;
+    private List<SongMetaData> fileInfo;
 
-    DriveFileService(List<String> fileInfo){
+    DriveFileService(List<SongMetaData> fileInfo){
         this.fileInfo = fileInfo;
     }
 
-    public static void initDriveInstance(List<String> fileInfo) {
+    public static void initDriveInstance(List<SongMetaData> fileInfo) {
         DriveInstance = new DriveFileService(fileInfo);
 
     }
 
-    public String getRandomFile() {
+    public SongMetaData getRandomFile() {
 
         if (this.fileInfo != null && this.fileInfo.size() > 0) {
             int numOfFIles = this.fileInfo.size();

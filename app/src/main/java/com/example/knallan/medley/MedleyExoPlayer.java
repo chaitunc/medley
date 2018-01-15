@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -43,8 +44,9 @@ public class MedleyExoPlayer implements Player.EventListener {
     private ExoPlayer player;
     Context mContext;
     private MedlyService service;
-    private CountDownTimer timer;
     boolean playing = false;
+    private CountDownTimer timer;
+    private TextView titleView;
 
     public CountDownTimer getTimer() {
          return timer;
@@ -128,7 +130,9 @@ public class MedleyExoPlayer implements Player.EventListener {
 
     private MediaSource getMediaSource() throws Exception {
 
-        String source = service.getSoundFilePath();
+        SongMetaData songMetaData = service.getSoundFilePath();
+        titleView.setText(songMetaData.getName());
+        String source = songMetaData.getUrl();
         // Produces DataSource instances through which media data is loaded.
         DataSource.Factory dataSourceFactory =
                 new DefaultDataSourceFactory(
@@ -161,7 +165,9 @@ public class MedleyExoPlayer implements Player.EventListener {
             Log.i("player","duration:" +player.getDuration());
             final long realDurationMillis = player.getDuration();
             if(player.getDuration()>0) {
+
                 int inSec = (int) (realDurationMillis / 1000);
+                titleView.setText(titleView.getText() + " with duration " + inSec);
                 int medleyTime = getMedleyPlayTime()/1000;
                 if(inSec>medleyTime) {
                     Random random = new Random();
@@ -171,12 +177,11 @@ public class MedleyExoPlayer implements Player.EventListener {
                 }
             }
             playing = true;
+            if(getTimer()!=null) {
+                getTimer().cancel();
+            }
             getNewTimer().start();
         }
-
-
-
-
     }
 
     public void stop() {
@@ -219,5 +224,13 @@ public class MedleyExoPlayer implements Player.EventListener {
 
     public void release() {
         player.release();
+    }
+
+    public void setTitleView(TextView titleView) {
+        this.titleView = titleView;
+    }
+
+    public TextView getTitleView() {
+        return titleView;
     }
 }

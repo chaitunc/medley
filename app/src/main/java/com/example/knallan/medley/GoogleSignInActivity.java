@@ -78,7 +78,10 @@ public class GoogleSignInActivity extends Activity
         } else if (mCredential.getSelectedAccountName() == null) {
             chooseAccount();
         } else {
-            new DriveFilesTask(mCredential,this).execute();
+            DriveFilesTask task = DriveFilesTask.getInstance(mCredential,this);
+            if(!task.isInitialized()){
+                task.execute();
+            }
 
             String accountName = getPreferences(Context.MODE_PRIVATE)
                     .getString(PREF_ACCOUNT_NAME, null);

@@ -12,7 +12,7 @@ public abstract class FileService {
     static FileService LocalInstance;
     static FileService DriveInstance;
 
-    public abstract String getRandomFile();
+    public abstract SongMetaData getRandomFile();
 
 
     public static FileService getInstance(SharedPreferences settings) {

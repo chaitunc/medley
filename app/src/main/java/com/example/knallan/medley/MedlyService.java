@@ -10,10 +10,10 @@ public class MedlyService {
     public static final int DURATION = 30;
     public static final int OFFSET = 2;
 
-    private String soundFile;
+    private SongMetaData soundFile;
     SharedPreferences settings;
 
-    public String getSoundFilePath() {
+    public SongMetaData getSoundFilePath() {
         soundFile = FileService.getInstance(this.settings).getRandomFile();
         return soundFile;
     }

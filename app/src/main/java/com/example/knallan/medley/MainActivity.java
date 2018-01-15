@@ -128,8 +128,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCompat.On
             addButtonActions();
         }
 
+        TextView title = findViewById(R.id.title);
         player = MedleyExoPlayer.getInstance();
-
+        player.setTitleView(title);
         medleyPlayTime.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int minValue = 30;
             @Override

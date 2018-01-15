@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class LocalFileService extends FileService{
 
-    private ArrayList<File> files;
+    private ArrayList<SongMetaData> files;
 
     LocalFileService(String folderPath){
         files = new ArrayList<>();
@@ -32,7 +32,7 @@ public class LocalFileService extends FileService{
         }
     }
 
-    protected void parseFolders(String directoryName, ArrayList<File> files) {
+    protected void parseFolders(String directoryName, ArrayList<SongMetaData> files) {
         File directory = new File(directoryName);
 
         // get all the files from a directory
@@ -60,14 +60,17 @@ public class LocalFileService extends FileService{
         });
         for (File file : fList) {
             if (file.isFile()) {
-                files.add(file);
+                SongMetaData metaData = new SongMetaData();
+                metaData.setUrl(file.getAbsolutePath());
+                metaData.setName(file.getName());
+                files.add(metaData);
             } else if (file.isDirectory()) {
                 parseFolders(file.getAbsolutePath(), files);
             }
         }
     }
 
-    public String getRandomFile() {
+    public SongMetaData getRandomFile() {
 
         if (this.files != null && this.files.size() > 0) {
             int numOfFIles = this.files.size();
@@ -79,7 +82,7 @@ public class LocalFileService extends FileService{
 
             Log.i("FileService", "Totla number of files:" + numOfFIles);
             Log.i("FileService", "Random FIle:" + this.files.get(randomFileIndex).getName());
-            return this.files.get(randomFileIndex).getAbsolutePath();
+            return this.files.get(randomFileIndex);
 
         }
         return null;
